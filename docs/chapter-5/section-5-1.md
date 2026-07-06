@@ -24,6 +24,18 @@ const quiz5Options = [
   'C. 这个公式只适用于直流电机',
   'D. ηN 越小，PN 一定越大'
 ]
+
+const quiz1Answer = quiz1Options[1]
+const quiz2Answer = quiz2Options[1]
+const quiz3Answer = quiz3Options[1]
+const quiz4Answer = quiz4Options[1]
+const quiz5Answer = quiz5Options[1]
+
+const quiz1Explanation = '异步电机的转子电流不是外接电源直接供给，而是由旋转磁场感应产生，因此也叫感应电机。'
+const quiz2Explanation = 'p 是极对数。若电机为 4 极，则 p = 2。'
+const quiz3Explanation = '当 0 < n < n1 时，s = (n1 - n) / n1，因此 0 < s < 1，对应电动机状态。'
+const quiz4Explanation = '当 n > n1 时，s < 0，电磁转矩成为制动转矩，机械能转化为电能送回电网。'
+const quiz5Explanation = '三相异步电动机铭牌额定功率计算中，UN 和 IN 按线电压、线电流使用。'
 </script>
 
 # 5.1 异步电机概述
@@ -325,36 +337,36 @@ PN ≈ 2159 W ≈ 2.16 kW
 <ChoiceQuiz
   question="异步电机也常被称为什么电机？"
   :options="quiz1Options"
-  answer="B. 感应电机"
-  explanation="异步电机的转子电流不是外接电源直接供给，而是由旋转磁场感应产生，因此也叫感应电机。"
+  :answer="quiz1Answer"
+  :explanation="quiz1Explanation"
 />
 
 <ChoiceQuiz
   question="同步转速 n1 = 60f1 / p 中，p 表示什么？"
   :options="quiz2Options"
-  answer="B. 极对数"
-  explanation="p 是极对数。若电机为 4 极，则 p = 2。"
+  :answer="quiz2Answer"
+  :explanation="quiz2Explanation"
 />
 
 <ChoiceQuiz
   question="异步电机在电动机状态下，转差率 s 的范围是？"
   :options="quiz3Options"
-  answer="B. 0 < s < 1"
-  explanation="当 0 < n < n1 时，s = (n1 - n) / n1，因此 0 < s < 1，对应电动机状态。"
+  :answer="quiz3Answer"
+  :explanation="quiz3Explanation"
 />
 
 <ChoiceQuiz
   question="当转子转速 n 大于同步转速 n1 时，异步电机通常处于什么状态？"
   :options="quiz4Options"
-  answer="B. 发电机状态"
-  explanation="当 n > n1 时，s < 0，电磁转矩成为制动转矩，机械能转化为电能送回电网。"
+  :answer="quiz4Answer"
+  :explanation="quiz4Explanation"
 />
 
 <ChoiceQuiz
   question="关于额定功率公式 PN = √3 UN IN ηN cosφN，下列说法正确的是？"
   :options="quiz5Options"
-  answer="B. UN 和 IN 是线电压和线电流"
-  explanation="三相异步电动机铭牌额定功率计算中，UN 和 IN 按线电压、线电流使用。"
+  :answer="quiz5Answer"
+  :explanation="quiz5Explanation"
 />
 
 ## 本节小结
