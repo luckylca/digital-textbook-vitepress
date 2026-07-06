@@ -1,6 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
 import naive from 'naive-ui'
+import 'katex/dist/katex.min.css'
 import './style.css'
 
 import KnowledgeCard from './components/KnowledgeCard.vue'
