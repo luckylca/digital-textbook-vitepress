@@ -13,29 +13,6 @@ const principleSteps = [
   '转子产生感应电动势和感应电流。',
   '感应电流与旋转磁场相互作用，产生电磁转矩。'
 ]
-
-const quiz1Options = ['A. 直流电机', 'B. 感应电机', 'C. 同步电机', 'D. 步进电机']
-const quiz2Options = ['A. 极数', 'B. 极对数', 'C. 功率因数', 'D. 转差率']
-const quiz3Options = ['A. s < 0', 'B. 0 < s < 1', 'C. s = 0', 'D. s > 1']
-const quiz4Options = ['A. 电动机状态', 'B. 发电机状态', 'C. 电磁制动状态', 'D. 堵转状态']
-const quiz5Options = [
-  'A. UN 和 IN 一定是相电压和相电流',
-  'B. UN 和 IN 是线电压和线电流',
-  'C. 这个公式只适用于直流电机',
-  'D. ηN 越小，PN 一定越大'
-]
-
-const quiz1Answer = quiz1Options[1]
-const quiz2Answer = quiz2Options[1]
-const quiz3Answer = quiz3Options[1]
-const quiz4Answer = quiz4Options[1]
-const quiz5Answer = quiz5Options[1]
-
-const quiz1Explanation = '异步电机的转子电流不是外接电源直接供给，而是由旋转磁场感应产生，因此也叫感应电机。'
-const quiz2Explanation = 'p 是极对数。若电机为 4 极，则 p = 2。'
-const quiz3Explanation = '当 0 < n < n1 时，s = (n1 - n) / n1，因此 0 < s < 1，对应电动机状态。'
-const quiz4Explanation = '当 n > n1 时，s < 0，电磁转矩成为制动转矩，机械能转化为电能送回电网。'
-const quiz5Explanation = '三相异步电动机铭牌额定功率计算中，UN 和 IN 按线电压、线电流使用。'
 </script>
 
 # 5.1 异步电机概述
@@ -110,6 +87,8 @@ const quiz5Explanation = '三相异步电动机铭牌额定功率计算中，UN 
 定子负责建立旋转磁场，转子通过感应获得电流并产生转矩，气隙是定子和转子之间进行电磁耦合的关键空间。
 </KnowledgeCard>
 
+<MotorStructureDiagram />
+
 ### 1. 定子
 
 定子主要包括定子铁芯、定子绕组和机座。
@@ -152,6 +131,8 @@ const quiz5Explanation = '三相异步电动机铭牌额定功率计算中，UN 
 异步电机的工作过程可以按“电源 → 磁场 → 感应 → 转矩”来理解。
 
 <StepExplain title="基本工作原理" :steps="principleSteps" />
+
+<WorkingPrincipleFlow />
 
 <KnowledgeCard title="核心因果链" type="summary">
 定子三相电流产生气隙基波旋转磁场；旋转磁场切割转子导体，使转子产生感应电动势和感应电流；转子感应电流与旋转磁场相互作用，在转子上产生电磁转矩。
@@ -206,6 +187,8 @@ s = (n1 - n) / n1
 | 电动机状态 | 0 &lt; n &lt; n1，0 &lt; s &lt; 1 | Tem 与 n 同向，为驱动转矩 | 电网电能 → 机械动能 |
 | 发电机状态 | n &gt; n1，s &lt; 0 | Tem 与 n 反向，为制动转矩 | 机械动能 → 电网电能 |
 | 电磁制动状态 | n &lt; 0，s &gt; 1 | Tem 与 n 反向，为制动转矩 | 机械动能 + 电网电能 → 内部损耗 |
+
+<MotorStateMap />
 
 <ImportantCard title="判断运行状态的最稳方法" type="info">
 不要只凭“转得快还是慢”判断。先算 s = (n1 - n) / n1，再看 s 的范围。
@@ -326,48 +309,11 @@ PN ≈ 2159 W ≈ 2.16 kW
 
 <SlipSpeedDemo />
 
-## 闯关小游戏：判断运行状态
-
-通过小游戏练习“先算转差率，再判断状态”。做题时不要凭感觉选，要先看 n 与 n1 的关系。
-
-<MotorStateGame />
-
 ## 即时练习
 
-<ChoiceQuiz
-  question="异步电机也常被称为什么电机？"
-  :options="quiz1Options"
-  :answer="quiz1Answer"
-  :explanation="quiz1Explanation"
-/>
+本练习区把基础概念、公式理解、运行状态判断、简单计算和易错辨析合并在一起。每题作答后会立即显示反馈，适合学完一遍后自查。
 
-<ChoiceQuiz
-  question="同步转速 n1 = 60f1 / p 中，p 表示什么？"
-  :options="quiz2Options"
-  :answer="quiz2Answer"
-  :explanation="quiz2Explanation"
-/>
-
-<ChoiceQuiz
-  question="异步电机在电动机状态下，转差率 s 的范围是？"
-  :options="quiz3Options"
-  :answer="quiz3Answer"
-  :explanation="quiz3Explanation"
-/>
-
-<ChoiceQuiz
-  question="当转子转速 n 大于同步转速 n1 时，异步电机通常处于什么状态？"
-  :options="quiz4Options"
-  :answer="quiz4Answer"
-  :explanation="quiz4Explanation"
-/>
-
-<ChoiceQuiz
-  question="关于额定功率公式 PN = √3 UN IN ηN cosφN，下列说法正确的是？"
-  :options="quiz5Options"
-  :answer="quiz5Answer"
-  :explanation="quiz5Explanation"
-/>
+<PracticePanel />
 
 ## 本节小结
 
