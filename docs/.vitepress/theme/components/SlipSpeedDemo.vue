@@ -14,24 +14,26 @@ const polePairOptions = [
 
 const syncSpeed = computed(() => (60 * frequency.value) / polePairs.value)
 const slip = computed(() => (syncSpeed.value - rotorSpeed.value) / syncSpeed.value)
-
 const slipPercent = computed(() => `${(slip.value * 100).toFixed(2)}%`)
 const syncSpeedText = computed(() => `${syncSpeed.value.toFixed(0)} r/min`)
+const isNearSync = computed(() => Math.abs(slip.value) < 0.005)
 
 const stateInfo = computed(() => {
   const s = slip.value
 
-  if (Math.abs(s) < 0.005) {
+  if (isNearSync.value) {
     return {
+      key: 'sync',
       type: 'warning' as const,
       title: '同步点',
       label: '接近同步转速',
-      desc: '转子与旋转磁场几乎同步，转子导体难以切割磁感线，不能产生稳定感应电动势和稳定电磁转矩。'
+      desc: '转子与旋转磁场接近同步，切割磁感线能力减弱，不能产生稳定感应转矩。'
     }
   }
 
   if (s > 0 && s < 1) {
     return {
+      key: 'motor',
       type: 'success' as const,
       title: '电动机状态',
       label: '0 < s < 1',
@@ -41,14 +43,16 @@ const stateInfo = computed(() => {
 
   if (s < 0) {
     return {
+      key: 'generator',
       type: 'info' as const,
       title: '发电机状态',
       label: 's < 0',
-      desc: '转子转速高于同步转速，电磁转矩为制动转矩，机械能可以转化为电能送回电网。'
+      desc: '转子转速高于同步转速，电磁转矩为制动转矩，机械能可以转化为电能。'
     }
   }
 
   return {
+    key: 'brake',
     type: 'error' as const,
     title: '电磁制动状态',
     label: 's > 1',
@@ -56,12 +60,19 @@ const stateInfo = computed(() => {
   }
 })
 
+const markerLeft = computed(() => {
+  const min = -0.5
+  const max = 1.5
+  const clamped = Math.min(max, Math.max(min, slip.value))
+  return `${((clamped - min) / (max - min)) * 100}%`
+})
+
 const fieldStyle = computed(() => ({
-  animationDuration: `${Math.max(1.2, 10 - Math.min(syncSpeed.value, 3600) / 420)}s`
+  animationDuration: `${Math.max(1.1, 10 - Math.min(syncSpeed.value, 3600) / 420)}s`
 }))
 
 const rotorStyle = computed(() => ({
-  animationDuration: `${Math.max(1.2, 10 - Math.min(Math.abs(rotorSpeed.value), 3600) / 420)}s`
+  animationDuration: `${Math.max(1.1, 10 - Math.min(Math.abs(rotorSpeed.value), 3600) / 420)}s`
 }))
 
 const rotorClass = computed(() => ({
@@ -80,16 +91,31 @@ const rotorClass = computed(() => ({
 
     <div class="slip-demo__layout">
       <div class="slip-demo__controls">
-        <label>定子频率 f1：{{ frequency }} Hz</label>
+        <div class="control-row">
+          <label>定子频率 f1：{{ frequency }} Hz</label>
+          <n-input-number v-model:value="frequency" :min="10" :max="100" :step="1" />
+        </div>
         <n-slider v-model:value="frequency" :min="10" :max="100" :step="1" />
-        <n-input-number v-model:value="frequency" :min="10" :max="100" :step="1" />
 
-        <label>极对数 p</label>
-        <n-select v-model:value="polePairs" :options="polePairOptions" />
+        <div class="control-row">
+          <label>极对数 p</label>
+          <n-select v-model:value="polePairs" :options="polePairOptions" />
+        </div>
 
-        <label>转子转速 n：{{ rotorSpeed }} r/min</label>
+        <div class="control-row">
+          <label>转子转速 n：{{ rotorSpeed }} r/min</label>
+          <n-input-number v-model:value="rotorSpeed" :min="-500" :max="4000" :step="10" />
+        </div>
         <n-slider v-model:value="rotorSpeed" :min="-500" :max="4000" :step="10" />
-        <n-input-number v-model:value="rotorSpeed" :min="-500" :max="4000" :step="10" />
+
+        <div class="state-bar" :class="`state-bar--${stateInfo.key}`">
+          <div class="state-bar__track">
+            <span class="state-bar__segment">s &lt; 0<br />发电机</span>
+            <span class="state-bar__segment">0 &lt; s &lt; 1<br />电动机</span>
+            <span class="state-bar__segment">s &gt; 1<br />制动</span>
+            <span class="state-bar__marker" :style="{ left: markerLeft }" />
+          </div>
+        </div>
       </div>
 
       <div class="slip-demo__visual">
@@ -107,6 +133,10 @@ const rotorClass = computed(() => ({
           <n-statistic label="同步转速 n1" :value="syncSpeedText" />
           <n-statistic label="转差率 s" :value="slipPercent" />
         </div>
+
+        <n-alert v-if="isNearSync" type="warning" title="同步点提示" bordered>
+          转子与旋转磁场接近同步，切割磁感线能力减弱，因此不能把同步点当作正常稳定电动机状态。
+        </n-alert>
 
         <n-alert :type="stateInfo.type" :title="stateInfo.title" bordered>
           <strong>{{ stateInfo.label }}</strong>：{{ stateInfo.desc }}
@@ -129,19 +159,64 @@ const rotorClass = computed(() => ({
 
 .slip-demo__layout {
   display: grid;
-  grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.1fr);
-  gap: 22px;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(300px, 1.1fr);
+  gap: 24px;
 }
 
 .slip-demo__controls {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   align-content: start;
 }
 
-.slip-demo__controls label {
-  margin-top: 8px;
+.control-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(120px, 180px);
+  gap: 12px;
+  align-items: center;
+}
+
+.control-row label {
   font-weight: 700;
+}
+
+.state-bar {
+  padding: 14px;
+  margin-top: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.state-bar__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  min-height: 62px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.16) 0 33%, rgba(22, 163, 74, 0.18) 33% 66%, rgba(239, 68, 68, 0.16) 66% 100%);
+}
+
+.state-bar__segment {
+  display: grid;
+  place-items: center;
+  color: var(--vp-c-text-1);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.state-bar__marker {
+  position: absolute;
+  top: 5px;
+  width: 4px;
+  height: calc(100% - 10px);
+  border-radius: 999px;
+  background: var(--vp-c-text-1);
+  box-shadow: 0 0 0 5px rgba(15, 23, 42, 0.1);
+  transform: translateX(-50%);
+  transition: left 0.25s ease;
 }
 
 .slip-demo__visual {
@@ -151,10 +226,10 @@ const rotorClass = computed(() => ({
 
 .motor-visual {
   position: relative;
-  min-height: 280px;
+  min-height: 300px;
   border-radius: 24px;
   border: 1px solid rgba(148, 163, 184, 0.28);
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 62%), rgba(248, 250, 252, 0.8);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.14), transparent 62%), rgba(248, 250, 252, 0.86);
   overflow: hidden;
 }
 
@@ -172,20 +247,23 @@ const rotorClass = computed(() => ({
 .ring::after {
   content: '';
   position: absolute;
-  right: -7px;
+  right: -9px;
   top: 50%;
   width: 0;
   height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 14px solid currentColor;
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+  border-left: 20px solid currentColor;
   transform: translateY(-50%);
 }
 
 .ring span {
   position: absolute;
   left: 50%;
-  top: -34px;
+  top: -38px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
   transform: translateX(-50%);
   white-space: nowrap;
   font-size: 0.86rem;
@@ -193,16 +271,16 @@ const rotorClass = computed(() => ({
 }
 
 .ring--field {
-  width: 190px;
-  height: 190px;
-  border: 3px dashed #2563eb;
+  width: 198px;
+  height: 198px;
+  border: 4px dashed #2563eb;
   color: #2563eb;
 }
 
 .ring--rotor {
-  width: 118px;
-  height: 118px;
-  border: 3px solid #16a34a;
+  width: 122px;
+  height: 122px;
+  border: 4px solid #16a34a;
   color: #16a34a;
 }
 
@@ -218,8 +296,8 @@ const rotorClass = computed(() => ({
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   background: var(--vp-c-text-2);
   transform: translate(-50%, -50%);
@@ -241,12 +319,18 @@ const rotorClass = computed(() => ({
 }
 
 @media (max-width: 760px) {
-  .slip-demo__layout {
+  .slip-demo__layout,
+  .slip-demo__metrics {
     grid-template-columns: 1fr;
   }
 
-  .slip-demo__metrics {
+  .control-row {
     grid-template-columns: 1fr;
+  }
+
+  .state-bar__track {
+    grid-template-columns: 1fr;
+    min-height: 120px;
   }
 }
 </style>
