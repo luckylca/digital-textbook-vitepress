@@ -11,13 +11,13 @@ export default defineConfig({
     logo: '📘',
     nav: [
       { text: '首页', link: '/' },
-      { text: '5.1 样章', link: '/chapter-5/section-5-1' }
+      { text: '5.1 异步电机概述', link: '/chapter-5/section-5-1' }
     ],
     sidebar: [
       {
-        text: '第五章',
+        text: '第五章 异步电机',
         items: [
-          { text: '5.1 数字化教材样章', link: '/chapter-5/section-5-1' }
+          { text: '5.1 异步电机概述', link: '/chapter-5/section-5-1' }
         ]
       }
     ],
