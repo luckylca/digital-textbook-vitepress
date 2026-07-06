@@ -91,13 +91,24 @@ function getNode(id: string) {
   return nodes.value.find((node) => node.id === id)
 }
 
-function nodeCenter(node: KnowledgeNode) {
-  const width = node.level === 'center' ? 176 : node.level === 'primary' ? 152 : 132
-  const height = node.level === 'center' ? 58 : 46
+function nodeSize(node: KnowledgeNode) {
   return {
-    x: node.x + width / 2,
-    y: node.y + height / 2
+    width: node.level === 'center' ? 176 : node.level === 'primary' ? 152 : 132,
+    height: node.level === 'center' ? 58 : 46
   }
+}
+
+function nodeCenter(node: KnowledgeNode) {
+  const size = nodeSize(node)
+  return {
+    x: node.x + size.width / 2,
+    y: node.y + size.height / 2
+  }
+}
+
+function linePoint(id: string) {
+  const node = getNode(id)
+  return node ? nodeCenter(node) : { x: 0, y: 0 }
 }
 
 function resetLayout() {
@@ -134,15 +145,14 @@ function onDrag(event: PointerEvent) {
   const node = getNode(draggingId.value)
   if (!node) return
 
-  const width = node.level === 'center' ? 176 : node.level === 'primary' ? 152 : 132
-  const height = node.level === 'center' ? 58 : 46
+  const size = nodeSize(node)
   const scaleX = 980 / rect.width
   const scaleY = 580 / rect.height
   const nextX = (event.clientX - rect.left) * scaleX - dragOffset.value.x
   const nextY = (event.clientY - rect.top) * scaleY - dragOffset.value.y
 
-  node.x = Math.min(980 - width - 8, Math.max(8, nextX))
-  node.y = Math.min(580 - height - 8, Math.max(8, nextY))
+  node.x = Math.min(980 - size.width - 8, Math.max(8, nextX))
+  node.y = Math.min(580 - size.height - 8, Math.max(8, nextY))
 }
 
 function stopDrag() {
@@ -173,10 +183,10 @@ function stopDrag() {
           <line
             v-for="link in links"
             :key="`${link.from}-${link.to}`"
-            :x1="nodeCenter(getNode(link.from)!).x"
-            :y1="nodeCenter(getNode(link.from)!).y"
-            :x2="nodeCenter(getNode(link.to)!).x"
-            :y2="nodeCenter(getNode(link.to)!).y"
+            :x1="linePoint(link.from).x"
+            :y1="linePoint(link.from).y"
+            :x2="linePoint(link.to).x"
+            :y2="linePoint(link.to).y"
           />
         </svg>
 
