@@ -10,6 +10,7 @@ import ChoiceQuiz from './components/ChoiceQuiz.vue'
 import StepExplain from './components/StepExplain.vue'
 import AnimationDemo from './components/AnimationDemo.vue'
 import MiniGame from './components/MiniGame.vue'
+import SlipSpeedDemo from './components/SlipSpeedDemo.vue'
 
 const theme: Theme = {
   extends: DefaultTheme,
@@ -23,6 +24,7 @@ const theme: Theme = {
     app.component('StepExplain', StepExplain)
     app.component('AnimationDemo', AnimationDemo)
     app.component('MiniGame', MiniGame)
+    app.component('SlipSpeedDemo', SlipSpeedDemo)
   }
 }
 
