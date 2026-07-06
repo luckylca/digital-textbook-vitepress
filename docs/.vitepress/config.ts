@@ -25,9 +25,6 @@ export default defineConfig({
       label: '本页目录',
       level: [2, 3]
     },
-    search: {
-      provider: 'local'
-    },
     docFooter: {
       prev: '上一节',
       next: '下一节'
