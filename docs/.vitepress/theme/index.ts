@@ -15,6 +15,7 @@ import PracticePanel from './components/PracticePanel.vue'
 import MotorStructureDiagram from './components/MotorStructureDiagram.vue'
 import WorkingPrincipleFlow from './components/WorkingPrincipleFlow.vue'
 import MotorStateMap from './components/MotorStateMap.vue'
+import KnowledgeMap from './components/KnowledgeMap.vue'
 
 const theme: Theme = {
   extends: DefaultTheme,
@@ -33,6 +34,7 @@ const theme: Theme = {
     app.component('MotorStructureDiagram', MotorStructureDiagram)
     app.component('WorkingPrincipleFlow', WorkingPrincipleFlow)
     app.component('MotorStateMap', MotorStateMap)
+    app.component('KnowledgeMap', KnowledgeMap)
   }
 }
 
