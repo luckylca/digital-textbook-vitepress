@@ -11,7 +11,10 @@ import StepExplain from './components/StepExplain.vue'
 import AnimationDemo from './components/AnimationDemo.vue'
 import MiniGame from './components/MiniGame.vue'
 import SlipSpeedDemo from './components/SlipSpeedDemo.vue'
-import StateGame from './components/MotorStateGame.vue'
+import PracticePanel from './components/PracticePanel.vue'
+import MotorStructureDiagram from './components/MotorStructureDiagram.vue'
+import WorkingPrincipleFlow from './components/WorkingPrincipleFlow.vue'
+import MotorStateMap from './components/MotorStateMap.vue'
 
 const theme: Theme = {
   extends: DefaultTheme,
@@ -26,7 +29,10 @@ const theme: Theme = {
     app.component('AnimationDemo', AnimationDemo)
     app.component('MiniGame', MiniGame)
     app.component('SlipSpeedDemo', SlipSpeedDemo)
-    app.component('MotorStateGame', StateGame)
+    app.component('PracticePanel', PracticePanel)
+    app.component('MotorStructureDiagram', MotorStructureDiagram)
+    app.component('WorkingPrincipleFlow', WorkingPrincipleFlow)
+    app.component('MotorStateMap', MotorStateMap)
   }
 }
 
