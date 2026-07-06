@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import katex from 'markdown-it-katex'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -7,6 +8,11 @@ export default defineConfig({
   base: '/digital-textbook-vitepress/',
   cleanUrls: true,
   lastUpdated: true,
+  markdown: {
+    config: (md) => {
+      md.use(katex)
+    }
+  },
   themeConfig: {
     logo: '📘',
     nav: [
