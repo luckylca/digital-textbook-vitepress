@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数字化教材样章 Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #2563eb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: rgba(100, 116, 139, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32rem), var(--bg);
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0;
+    }
+
+    .hero {
+      padding: 42px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.2rem, 6vw, 4.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    a.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .primary {
+      color: white;
+      background: var(--brand);
+    }
+
+    .secondary {
+      color: var(--brand);
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+
+    .notice {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.06);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>数字化教材样章 Demo</h1>
+      <p>这是一个使用 VitePress + Naive UI 构建的数字化教材网页原型。当前页面是 GitHub Pages 分支部署模式下的静态兜底首页，用来避免仓库还没有成功执行 VitePress 构建时出现 404。</p>
+      <div class="actions">
+        <a class="button primary" href="./docs/">查看源码文档目录</a>
+        <a class="button secondary" href="./chapter-5/section-5-1/">查看章节占位页</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card"><strong>知识点讲解</strong><p>后续用组件化卡片承载概念、公式与总结。</p></div>
+      <div class="card"><strong>例题讲解</strong><p>后续为典型题补充题目、思路、步骤和答案。</p></div>
+      <div class="card"><strong>即时练习</strong><p>后续加入可交互选择题和解析反馈。</p></div>
+      <div class="card"><strong>交互演示</strong><p>后续接入动画或小游戏辅助理解。</p></div>
+    </section>
+
+    <div class="notice">
+      <p><strong>说明：</strong>正式 VitePress 版本需要 GitHub Pages 的 Source 选择 <code>GitHub Actions</code>。如果当前 Pages 使用 <code>Deploy from a branch</code>，这个静态首页会先保证项目不是 404。</p>
+    </div>
+  </main>
+</body>
+</html>
