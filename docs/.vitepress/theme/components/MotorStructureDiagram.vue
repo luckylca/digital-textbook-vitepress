@@ -1,83 +1,45 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { section51MotorParts } from '../data/section51'
+import type { MotorPart } from '../types/teaching'
 
-type PartKey = 'stator' | 'rotor' | 'gap' | 'shaft' | 'frame'
+const props = withDefaults(defineProps<{
+  title?: string
+  subtitle?: string
+  parts?: MotorPart[]
+}>(), {
+  title: '异步电机结构图例',
+  subtitle: '点击图中的不同部位，查看定子、转子、气隙、转轴和机座的作用。'
+})
 
-interface PartInfo {
-  key: PartKey
-  name: string
-  desc: string
-}
+const resolvedParts = computed(() => props.parts?.length ? props.parts : section51MotorParts)
+const activeId = ref(resolvedParts.value[0]?.id || 'stator')
 
-const parts: PartInfo[] = [
-  { key: 'stator', name: '定子', desc: '定子铁芯提供主磁路，定子绕组接入三相电源后产生电流和旋转磁场。' },
-  { key: 'rotor', name: '转子', desc: '转子铁芯和转子绕组随转轴旋转，转子绕组中产生感应电动势和感应电流。' },
-  { key: 'gap', name: '气隙', desc: '气隙位于定子和转子之间，是主磁路的一部分，也是定子和转子进行电磁耦合的空间。' },
-  { key: 'shaft', name: '转轴', desc: '转轴支撑转子，并承担输入或输出机械转矩的作用。' },
-  { key: 'frame', name: '机座', desc: '机座用于固定和支撑定子铁芯，使电机整体结构保持稳定。' }
-]
+watch(resolvedParts, (nextParts) => {
+  activeId.value = nextParts[0]?.id || 'stator'
+}, { deep: true })
 
-const activeKey = ref<PartKey>('stator')
-const activePart = computed(() => parts.find((part) => part.key === activeKey.value) || parts[0])
+const activePart = computed(() => resolvedParts.value.find((part) => part.id === activeId.value) || resolvedParts.value[0])
 
-function selectPart(key: PartKey) {
-  activeKey.value = key
+function selectPart(id: string) {
+  activeId.value = id
 }
 </script>
 
 <template>
   <n-card class="structure-diagram teaching-card" embedded>
-    <template #header>异步电机结构图例</template>
+    <template #header>{{ title }}</template>
 
-    <p class="structure-diagram__intro">点击图中的不同部位，查看定子、转子、气隙、转轴和机座的作用。</p>
+    <p class="structure-diagram__intro">{{ subtitle }}</p>
 
     <div class="structure-diagram__layout">
       <div class="structure-diagram__canvas">
-        <svg viewBox="0 0 420 300" role="img" aria-label="异步电机简化剖面图">
-          <rect
-            x="38"
-            y="50"
-            width="344"
-            height="200"
-            rx="28"
-            class="part part--frame"
-            :class="{ active: activeKey === 'frame' }"
-            @click="selectPart('frame')"
-          />
-          <circle
-            cx="210"
-            cy="150"
-            r="96"
-            class="part part--stator"
-            :class="{ active: activeKey === 'stator' }"
-            @click="selectPart('stator')"
-          />
-          <circle
-            cx="210"
-            cy="150"
-            r="67"
-            class="part part--gap"
-            :class="{ active: activeKey === 'gap' }"
-            @click="selectPart('gap')"
-          />
-          <circle
-            cx="210"
-            cy="150"
-            r="50"
-            class="part part--rotor"
-            :class="{ active: activeKey === 'rotor' }"
-            @click="selectPart('rotor')"
-          />
-          <rect
-            x="100"
-            y="141"
-            width="220"
-            height="18"
-            rx="9"
-            class="part part--shaft"
-            :class="{ active: activeKey === 'shaft' }"
-            @click="selectPart('shaft')"
-          />
+        <svg viewBox="0 0 420 300" role="img" aria-label="电机简化剖面图">
+          <rect x="38" y="50" width="344" height="200" rx="28" class="part part--frame" :class="{ active: activeId === 'frame' }" @click="selectPart('frame')" />
+          <circle cx="210" cy="150" r="96" class="part part--stator" :class="{ active: activeId === 'stator' }" @click="selectPart('stator')" />
+          <circle cx="210" cy="150" r="67" class="part part--gap" :class="{ active: activeId === 'gap' }" @click="selectPart('gap')" />
+          <circle cx="210" cy="150" r="50" class="part part--rotor" :class="{ active: activeId === 'rotor' }" @click="selectPart('rotor')" />
+          <rect x="100" y="141" width="220" height="18" rx="9" class="part part--shaft" :class="{ active: activeId === 'shaft' }" @click="selectPart('shaft')" />
           <text x="210" y="42" text-anchor="middle">机座</text>
           <text x="210" y="82" text-anchor="middle">定子</text>
           <text x="292" y="155">气隙</text>
@@ -86,19 +48,19 @@ function selectPart(key: PartKey) {
         </svg>
       </div>
 
-      <div class="structure-diagram__info">
+      <div v-if="activePart" class="structure-diagram__info">
         <n-tag round type="info">当前部位</n-tag>
         <h3>{{ activePart.name }}</h3>
-        <p>{{ activePart.desc }}</p>
+        <p>{{ activePart.description }}</p>
 
         <div class="structure-diagram__buttons">
           <n-button
-            v-for="part in parts"
-            :key="part.key"
+            v-for="part in resolvedParts"
+            :key="part.id"
             size="small"
-            :type="part.key === activeKey ? 'primary' : 'default'"
+            :type="part.id === activeId ? 'primary' : 'default'"
             secondary
-            @click="selectPart(part.key)"
+            @click="selectPart(part.id)"
           >
             {{ part.name }}
           </n-button>
@@ -158,36 +120,11 @@ function selectPart(key: PartKey) {
   stroke-width: 5;
 }
 
-.part--frame {
-  fill: rgba(148, 163, 184, 0.16);
-  stroke: #64748b;
-  stroke-width: 3;
-}
-
-.part--stator {
-  fill: rgba(37, 99, 235, 0.18);
-  stroke: #2563eb;
-  stroke-width: 3;
-}
-
-.part--gap {
-  fill: rgba(255, 255, 255, 0.82);
-  stroke: #f59e0b;
-  stroke-width: 3;
-  stroke-dasharray: 8 7;
-}
-
-.part--rotor {
-  fill: rgba(22, 163, 74, 0.22);
-  stroke: #16a34a;
-  stroke-width: 3;
-}
-
-.part--shaft {
-  fill: rgba(15, 23, 42, 0.72);
-  stroke: #0f172a;
-  stroke-width: 2;
-}
+.part--frame { fill: rgba(148, 163, 184, 0.16); stroke: #64748b; stroke-width: 3; }
+.part--stator { fill: rgba(37, 99, 235, 0.18); stroke: #2563eb; stroke-width: 3; }
+.part--gap { fill: rgba(255, 255, 255, 0.82); stroke: #f59e0b; stroke-width: 3; stroke-dasharray: 8 7; }
+.part--rotor { fill: rgba(22, 163, 74, 0.22); stroke: #16a34a; stroke-width: 3; }
+.part--shaft { fill: rgba(15, 23, 42, 0.72); stroke: #0f172a; stroke-width: 2; }
 
 .structure-diagram__info {
   padding: 20px;
