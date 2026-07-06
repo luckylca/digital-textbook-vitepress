@@ -1,91 +1,62 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import {
+  section51BraceGroups,
+  section51KnowledgeLinks,
+  section51KnowledgeNodes
+} from '../data/section51'
+import type { BraceGroup, KnowledgeLink, KnowledgeMapMode, KnowledgeNode } from '../types/teaching'
 
-type MapMode = 'nodes' | 'brace'
-type NodeLevel = 'center' | 'primary' | 'secondary'
+const props = withDefaults(defineProps<{
+  title?: string
+  subtitle?: string
+  nodes?: KnowledgeNode[]
+  links?: KnowledgeLink[]
+  braceGroups?: BraceGroup[]
+  defaultMode?: KnowledgeMapMode
+}>(), {
+  title: '本节知识地图',
+  subtitle: '拖拽节点，先建立整体框架，再进入公式和运行状态。',
+  defaultMode: 'node'
+})
 
-interface KnowledgeNode {
-  id: string
-  label: string
-  level: NodeLevel
-  x: number
-  y: number
-  desc: string
-}
-
-interface LinkLine {
-  from: string
-  to: string
-}
-
-interface BranchGroup {
-  title: string
-  items: string[]
-  desc: string
-}
-
-const mapMode = ref<MapMode>('nodes')
+const mapMode = ref<KnowledgeMapMode>(props.defaultMode)
 const selectedId = ref('center')
+const hoveredId = ref<string | null>(null)
 const draggingId = ref<string | null>(null)
 const dragOffset = ref({ x: 0, y: 0 })
 
-const defaultNodes: KnowledgeNode[] = [
-  { id: 'center', label: '5.1 异步电机概述', level: 'center', x: 430, y: 210, desc: '本节从结构、工作原理、转差率、运行状态和额定值理解异步电机。' },
-  { id: 'type-structure', label: '基本类型和结构', level: 'primary', x: 150, y: 92, desc: '先认识异步电机是什么，再掌握单相/三相、笼型/绕线型、定子/转子/气隙。' },
-  { id: 'principle', label: '基本工作原理', level: 'primary', x: 710, y: 92, desc: '定子三相电流产生旋转磁场，转子感应出电流，并与磁场作用产生电磁转矩。' },
-  { id: 'slip', label: '同步转速与转差率', level: 'primary', x: 132, y: 330, desc: '同步转速由 f1 和 p 决定；转差率 s 反映转子转速与同步转速的差异。' },
-  { id: 'state', label: '三种运行状态', level: 'primary', x: 725, y: 330, desc: '根据转差率 s 判断电动机状态、发电机状态和电磁制动状态。' },
-  { id: 'rated', label: '铭牌额定值', level: 'primary', x: 430, y: 405, desc: '额定值包括 PN、UN、IN、fN、nN，额定功率公式使用线电压和线电流。' },
-  { id: 'definition', label: '异步电机定义', level: 'secondary', x: 48, y: 22, desc: '异步电机是一种交流电机，也称感应电机，主要用作电动机。' },
-  { id: 'phase', label: '单相 / 三相', level: 'secondary', x: 70, y: 164, desc: '按相数可分为单相异步机和三相异步机。' },
-  { id: 'rotor-type', label: '笼型 / 绕线型', level: 'secondary', x: 258, y: 164, desc: '按转子结构可分为笼型异步机和绕线型异步机。' },
-  { id: 'stator', label: '定子', level: 'secondary', x: 248, y: 22, desc: '定子铁芯提供主磁路，定子绕组接电后产生电流。' },
-  { id: 'rotor', label: '转子', level: 'secondary', x: 382, y: 82, desc: '转子通过电磁感应获得电动势和电流，并产生转矩。' },
-  { id: 'gap', label: '气隙', level: 'secondary', x: 382, y: 152, desc: '气隙位于定子和转子之间，是电机主磁路的一部分。' },
-  { id: 'field', label: '旋转磁场', level: 'secondary', x: 590, y: 20, desc: '三相对称电流在气隙中建立基波旋转磁场。' },
-  { id: 'induction', label: '感应电动势和电流', level: 'secondary', x: 796, y: 20, desc: '旋转磁场切割转子导体，使转子产生感应电动势和感应电流。' },
-  { id: 'torque', label: '电磁转矩', level: 'secondary', x: 862, y: 150, desc: '转子感应电流与旋转磁场相互作用，在转子上产生电磁转矩。' },
-  { id: 'n1-formula', label: 'n1 = 60f1 / p', level: 'secondary', x: 22, y: 260, desc: '同步转速由定子电流频率 f1 和极对数 p 决定。' },
-  { id: 's-formula', label: 's = (n1 - n) / n1', level: 'secondary', x: 248, y: 260, desc: '转差率表示转子转速与同步转速的相对差异。' },
-  { id: 'motor-state', label: '电动机状态', level: 'secondary', x: 585, y: 260, desc: '0 < s < 1，电磁转矩为驱动转矩，电能转化为机械能。' },
-  { id: 'generator-state', label: '发电机状态', level: 'secondary', x: 794, y: 260, desc: 's < 0，转速高于同步转速，机械能可以转化为电能。' },
-  { id: 'brake-state', label: '电磁制动状态', level: 'secondary', x: 846, y: 405, desc: 's > 1，转子反向转动，电磁转矩为制动转矩。' },
-  { id: 'pn-formula', label: 'PN = √3UNINηNcosφN', level: 'secondary', x: 310, y: 500, desc: '额定功率公式中的 UN 和 IN 按线电压、线电流计算。' }
-]
+const resolvedNodes = computed(() => props.nodes?.length ? props.nodes : section51KnowledgeNodes)
+const resolvedLinks = computed(() => props.links?.length ? props.links : section51KnowledgeLinks)
+const resolvedBraceGroups = computed(() => props.braceGroups?.length ? props.braceGroups : section51BraceGroups)
 
-const links: LinkLine[] = [
-  { from: 'center', to: 'type-structure' },
-  { from: 'center', to: 'principle' },
-  { from: 'center', to: 'slip' },
-  { from: 'center', to: 'state' },
-  { from: 'center', to: 'rated' },
-  { from: 'type-structure', to: 'definition' },
-  { from: 'type-structure', to: 'phase' },
-  { from: 'type-structure', to: 'rotor-type' },
-  { from: 'type-structure', to: 'stator' },
-  { from: 'type-structure', to: 'rotor' },
-  { from: 'type-structure', to: 'gap' },
-  { from: 'principle', to: 'field' },
-  { from: 'principle', to: 'induction' },
-  { from: 'principle', to: 'torque' },
-  { from: 'slip', to: 'n1-formula' },
-  { from: 'slip', to: 's-formula' },
-  { from: 'state', to: 'motor-state' },
-  { from: 'state', to: 'generator-state' },
-  { from: 'state', to: 'brake-state' },
-  { from: 'rated', to: 'pn-formula' }
-]
+const nodes = ref<KnowledgeNode[]>(cloneNodes(resolvedNodes.value))
 
-const branchGroups: BranchGroup[] = [
-  { title: '基本类型和结构', items: ['定义：交流电机，也称感应电机', '类型：单相 / 三相，笼型 / 绕线型', '结构：定子、转子、气隙'], desc: '先把对象和结构搭起来，再学习电磁过程。' },
-  { title: '基本工作原理', items: ['三相对称电流', '气隙旋转磁场', '感应电动势 / 电流', '电磁转矩'], desc: '抓住电源、磁场、感应、转矩的因果链。' },
-  { title: '同步转速与转差率', items: ['n1 = 60f1 / p', 's = (n1 - n) / n1'], desc: 'n1 由频率和极对数决定，s 用来衡量异步程度。' },
-  { title: '三种运行状态', items: ['电动机状态', '发电机状态', '电磁制动状态'], desc: '根据 s 的范围判断运行状态。' },
-  { title: '额定值', items: ['PN、UN、IN、fN、nN', 'PN = √3UNINηNcosφN'], desc: '铭牌额定值用于描述额定工况下的电压、电流、功率、频率和转速。' }
-]
+watch(resolvedNodes, (nextNodes) => {
+  nodes.value = cloneNodes(nextNodes)
+  selectedId.value = nodes.value[0]?.id || 'center'
+}, { deep: true })
 
-const nodes = ref<KnowledgeNode[]>(defaultNodes.map((node) => ({ ...node })))
-const selectedNode = computed(() => nodes.value.find((node) => node.id === selectedId.value) || nodes.value[0])
+function cloneNodes(source: KnowledgeNode[]) {
+  return source.map((node) => ({ ...node }))
+}
+
+const selectedNode = computed(() => getNode(selectedId.value) || nodes.value[0])
+const activeRootId = computed(() => selectedNode.value?.level === 'secondary' ? selectedNode.value.parentId : selectedId.value)
+
+const activeNodeIds = computed(() => {
+  const ids = new Set<string>()
+  if (selectedId.value) ids.add(selectedId.value)
+  if (hoveredId.value) ids.add(hoveredId.value)
+
+  const rootId = activeRootId.value
+  if (rootId) {
+    ids.add(rootId)
+    nodes.value.filter((node) => node.parentId === rootId).forEach((node) => ids.add(node.id))
+  }
+
+  return ids
+})
 
 function getNode(id: string) {
   return nodes.value.find((node) => node.id === id)
@@ -93,8 +64,8 @@ function getNode(id: string) {
 
 function nodeSize(node: KnowledgeNode) {
   return {
-    width: node.level === 'center' ? 176 : node.level === 'primary' ? 152 : 132,
-    height: node.level === 'center' ? 58 : 46
+    width: node.level === 'center' ? 184 : node.level === 'primary' ? 160 : 138,
+    height: node.level === 'center' ? 62 : 48
   }
 }
 
@@ -111,21 +82,73 @@ function linePoint(id: string) {
   return node ? nodeCenter(node) : { x: 0, y: 0 }
 }
 
+function curvePath(link: KnowledgeLink) {
+  const from = linePoint(link.source)
+  const to = linePoint(link.target)
+  const dx = Math.abs(to.x - from.x)
+  const curve = Math.max(48, dx * 0.42)
+  const c1x = from.x + (to.x >= from.x ? curve : -curve)
+  const c2x = to.x - (to.x >= from.x ? curve : -curve)
+  return `M ${from.x} ${from.y} C ${c1x} ${from.y}, ${c2x} ${to.y}, ${to.x} ${to.y}`
+}
+
+function isLinkActive(link: KnowledgeLink) {
+  return activeNodeIds.value.has(link.source) && activeNodeIds.value.has(link.target)
+}
+
 function resetLayout() {
-  nodes.value = defaultNodes.map((node) => ({ ...node }))
-  selectedId.value = 'center'
+  nodes.value = cloneNodes(resolvedNodes.value)
+  selectedId.value = nodes.value[0]?.id || 'center'
+}
+
+function autoArrange() {
+  const center = getNode('center') || nodes.value.find((node) => node.level === 'center')
+  if (center) {
+    center.x = 414
+    center.y = 214
+  }
+
+  const primaryNodes = nodes.value.filter((node) => node.level === 'primary')
+  const primaryPositions = [
+    { x: 150, y: 82 },
+    { x: 674, y: 82 },
+    { x: 122, y: 336 },
+    { x: 704, y: 336 },
+    { x: 414, y: 430 }
+  ]
+
+  primaryNodes.forEach((node, index) => {
+    const pos = primaryPositions[index] || primaryPositions[0]
+    node.x = pos.x
+    node.y = pos.y
+  })
+
+  const secondaryByParent: Record<string, { x: number; y: number }[]> = {
+    'type-structure': [{ x: 42, y: 26 }, { x: 52, y: 170 }, { x: 264, y: 170 }, { x: 274, y: 28 }, { x: 360, y: 98 }, { x: 360, y: 164 }],
+    principle: [{ x: 570, y: 28 }, { x: 784, y: 28 }, { x: 824, y: 170 }],
+    slip: [{ x: 28, y: 264 }, { x: 260, y: 264 }],
+    state: [{ x: 560, y: 264 }, { x: 784, y: 264 }, { x: 824, y: 432 }],
+    rated: [{ x: 300, y: 520 }]
+  }
+
+  Object.entries(secondaryByParent).forEach(([parentId, positions]) => {
+    nodes.value.filter((node) => node.parentId === parentId).forEach((node, index) => {
+      const pos = positions[index] || positions[positions.length - 1]
+      node.x = pos.x
+      node.y = pos.y
+    })
+  })
 }
 
 function selectNode(id: string) {
   selectedId.value = id
 }
 
-function selectBranch(group: BranchGroup) {
-  const match = nodes.value.find((node) => node.label === group.title)
-  selectedId.value = match?.id || 'center'
+function selectBranch(group: BraceGroup) {
+  selectedId.value = group.id || nodes.value.find((node) => node.label === group.title)?.id || 'center'
 }
 
-// Pointer Events 同时支持鼠标和触控。拖拽时只更新当前节点坐标，SVG 连线会自动根据坐标重新计算。
+// Pointer Events 同时支持鼠标和触控。拖拽时只更新当前节点坐标，SVG 曲线连线会自动重新计算。
 function startDrag(event: PointerEvent, node: KnowledgeNode) {
   const target = event.currentTarget as HTMLElement
   target.setPointerCapture(event.pointerId)
@@ -147,12 +170,12 @@ function onDrag(event: PointerEvent) {
 
   const size = nodeSize(node)
   const scaleX = 980 / rect.width
-  const scaleY = 580 / rect.height
+  const scaleY = 600 / rect.height
   const nextX = (event.clientX - rect.left) * scaleX - dragOffset.value.x
   const nextY = (event.clientY - rect.top) * scaleY - dragOffset.value.y
 
   node.x = Math.min(980 - size.width - 8, Math.max(8, nextX))
-  node.y = Math.min(580 - size.height - 8, Math.max(8, nextY))
+  node.y = Math.min(600 - size.height - 8, Math.max(8, nextY))
 }
 
 function stopDrag() {
@@ -165,70 +188,82 @@ function stopDrag() {
     <div class="knowledge-map-header">
       <div>
         <div class="map-kicker">学习路径</div>
-        <h2>本节知识地图</h2>
-        <p>先从整体结构理解 5.1，再进入公式、运行状态和额定值。</p>
+        <h2>{{ title }}</h2>
+        <p>{{ subtitle }}</p>
       </div>
       <div class="map-actions">
         <n-button-group>
-          <n-button :type="mapMode === 'nodes' ? 'primary' : 'default'" @click="mapMode = 'nodes'">节点图</n-button>
+          <n-button :type="mapMode === 'node' ? 'primary' : 'default'" @click="mapMode = 'node'">节点图</n-button>
           <n-button :type="mapMode === 'brace' ? 'primary' : 'default'" @click="mapMode = 'brace'">大括号图</n-button>
         </n-button-group>
+        <n-button secondary @click="autoArrange">自动整理</n-button>
         <n-button secondary @click="resetLayout">重置布局</n-button>
       </div>
     </div>
 
-    <div v-if="mapMode === 'nodes'" class="knowledge-node-wrap">
-      <div class="knowledge-node-canvas" @pointermove="onDrag" @pointerup="stopDrag" @pointerleave="stopDrag">
-        <svg class="knowledge-lines" viewBox="0 0 980 580" preserveAspectRatio="none">
-          <line
-            v-for="link in links"
-            :key="`${link.from}-${link.to}`"
-            :x1="linePoint(link.from).x"
-            :y1="linePoint(link.from).y"
-            :x2="linePoint(link.to).x"
-            :y2="linePoint(link.to).y"
-          />
-        </svg>
+    <Transition name="map-fade" mode="out-in">
+      <div v-if="mapMode === 'node'" key="nodes" class="knowledge-node-wrap">
+        <div class="knowledge-node-canvas" @pointermove="onDrag" @pointerup="stopDrag" @pointerleave="stopDrag" @dblclick="resetLayout">
+          <svg class="knowledge-lines" viewBox="0 0 980 600" preserveAspectRatio="none">
+            <path
+              v-for="link in resolvedLinks"
+              :key="`${link.source}-${link.target}`"
+              :d="curvePath(link)"
+              :class="{ active: isLinkActive(link) }"
+            />
+          </svg>
 
-        <button
-          v-for="node in nodes"
-          :key="node.id"
-          class="knowledge-node"
-          :class="[`knowledge-node--${node.level}`, { active: selectedId === node.id }]"
-          :style="{ left: `${node.x}px`, top: `${node.y}px` }"
-          type="button"
-          @click="selectNode(node.id)"
-          @pointerdown="startDrag($event, node)"
-        >
-          {{ node.label }}
-        </button>
+          <button
+            v-for="(node, index) in nodes"
+            :key="node.id"
+            class="knowledge-node"
+            :class="[
+              `knowledge-node--${node.level}`,
+              { active: selectedId === node.id, related: activeNodeIds.has(node.id), dragging: draggingId === node.id }
+            ]"
+            :style="{ left: `${node.x}px`, top: `${node.y}px`, animationDelay: `${Math.min(index * 36, 520)}ms` }"
+            :title="node.description"
+            type="button"
+            @click="selectNode(node.id)"
+            @mouseenter="hoveredId = node.id"
+            @mouseleave="hoveredId = null"
+            @pointerdown="startDrag($event, node)"
+          >
+            {{ node.label }}
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div v-else class="brace-map">
-      <div class="brace-root">
-        <span>5.1</span>
-        <strong>异步电机概述</strong>
+      <div v-else key="brace" class="brace-map">
+        <div class="brace-root">
+          <span>5.1</span>
+          <strong>异步电机概述</strong>
+          <small>从整体到细节</small>
+        </div>
+        <div class="brace-rail">
+          <span />
+        </div>
+        <div class="brace-groups">
+          <button
+            v-for="group in resolvedBraceGroups"
+            :key="group.title"
+            class="brace-group"
+            :class="{ active: selectedId === group.id }"
+            type="button"
+            @click="selectBranch(group)"
+          >
+            <h3>{{ group.title }}</h3>
+            <p v-if="group.description">{{ group.description }}</p>
+            <ul>
+              <li v-for="item in group.items" :key="item">{{ item }}</li>
+            </ul>
+          </button>
+        </div>
       </div>
-      <div class="brace-symbol">&#123;</div>
-      <div class="brace-groups">
-        <button
-          v-for="group in branchGroups"
-          :key="group.title"
-          class="brace-group"
-          type="button"
-          @click="selectBranch(group)"
-        >
-          <h3>{{ group.title }}</h3>
-          <ul>
-            <li v-for="item in group.items" :key="item">{{ item }}</li>
-          </ul>
-        </button>
-      </div>
-    </div>
+    </Transition>
 
-    <n-alert class="knowledge-map-info" type="info" :title="selectedNode.label" bordered>
-      {{ selectedNode.desc }}
+    <n-alert v-if="selectedNode" class="knowledge-map-info" type="info" :title="selectedNode.label" bordered>
+      {{ selectedNode.description }}
     </n-alert>
   </n-card>
 </template>
@@ -274,6 +309,17 @@ function stopDrag() {
   justify-content: flex-end;
 }
 
+.map-fade-enter-active,
+.map-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.map-fade-enter-from,
+.map-fade-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 .knowledge-node-wrap {
   overflow-x: auto;
   padding-bottom: 8px;
@@ -282,13 +328,24 @@ function stopDrag() {
 .knowledge-node-canvas {
   position: relative;
   min-width: 980px;
-  height: 580px;
-  border-radius: 24px;
+  height: 600px;
+  border-radius: 26px;
   border: 1px solid rgba(148, 163, 184, 0.28);
   background:
-    radial-gradient(circle at 50% 36%, rgba(59, 130, 246, 0.14), transparent 28%),
+    radial-gradient(circle at 50% 38%, rgba(59, 130, 246, 0.15), transparent 28%),
+    radial-gradient(circle at 20% 18%, rgba(16, 185, 129, 0.12), transparent 20%),
     linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(16, 185, 129, 0.08));
   touch-action: none;
+  overflow: hidden;
+}
+
+.knowledge-node-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 18px;
+  border-radius: 22px;
+  border: 1px dashed rgba(37, 99, 235, 0.12);
+  pointer-events: none;
 }
 
 .knowledge-lines {
@@ -299,54 +356,78 @@ function stopDrag() {
   pointer-events: none;
 }
 
-.knowledge-lines line {
-  stroke: rgba(37, 99, 235, 0.28);
-  stroke-width: 2;
-  stroke-dasharray: 6 6;
+.knowledge-lines path {
+  fill: none;
+  stroke: rgba(37, 99, 235, 0.24);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 8 8;
+  opacity: 0;
+  animation: line-in 0.7s ease forwards;
+  transition: stroke 0.18s ease, stroke-width 0.18s ease, opacity 0.18s ease;
+}
+
+.knowledge-lines path.active {
+  stroke: rgba(37, 99, 235, 0.78);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+  opacity: 1;
 }
 
 .knowledge-node {
   position: absolute;
   display: grid;
   place-items: center;
-  min-height: 46px;
+  min-height: 48px;
   padding: 8px 14px;
   border: 1px solid rgba(148, 163, 184, 0.34);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   color: var(--vp-c-text-1);
   cursor: grab;
-  font-weight: 700;
+  font-weight: 750;
   line-height: 1.25;
   text-align: center;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
   user-select: none;
+  opacity: 0;
+  animation: node-pop 0.44s ease forwards;
 }
 
 .knowledge-node:hover,
-.knowledge-node.active {
+.knowledge-node.active,
+.knowledge-node.related {
   transform: translateY(-2px);
   border-color: rgba(37, 99, 235, 0.62);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.13);
+}
+
+.knowledge-node.dragging {
+  transform: translateY(-4px) scale(1.035);
+  cursor: grabbing;
+  z-index: 8;
 }
 
 .knowledge-node--center {
-  width: 176px;
-  min-height: 58px;
+  width: 184px;
+  min-height: 62px;
   border: none;
   background: linear-gradient(135deg, #2563eb, #0f766e);
   color: white;
   font-size: 1rem;
+  box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.10), 0 18px 38px rgba(37, 99, 235, 0.22);
+  animation: node-pop 0.44s ease forwards, center-pulse 2.8s ease-in-out infinite;
 }
 
 .knowledge-node--primary {
-  width: 152px;
-  background: rgba(37, 99, 235, 0.1);
+  width: 160px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(16, 185, 129, 0.10));
+  border-color: rgba(37, 99, 235, 0.30);
 }
 
 .knowledge-node--secondary {
-  width: 132px;
+  width: 138px;
   background: rgba(255, 255, 255, 0.9);
   color: var(--vp-c-text-2);
   font-size: 0.86rem;
@@ -354,11 +435,11 @@ function stopDrag() {
 
 .brace-map {
   display: grid;
-  grid-template-columns: minmax(150px, 0.75fr) 54px minmax(360px, 2fr);
-  gap: 14px;
+  grid-template-columns: minmax(150px, 0.7fr) 58px minmax(360px, 2fr);
+  gap: 16px;
   align-items: stretch;
-  padding: 18px;
-  border-radius: 24px;
+  padding: 20px;
+  border-radius: 26px;
   border: 1px solid rgba(148, 163, 184, 0.26);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(16, 185, 129, 0.08));
 }
@@ -366,29 +447,64 @@ function stopDrag() {
 .brace-root {
   display: grid;
   place-content: center;
-  padding: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.86);
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.88);
   text-align: center;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
 .brace-root span {
   color: var(--vp-c-brand-1);
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .brace-root strong {
   margin-top: 8px;
-  font-size: 1.16rem;
+  font-size: 1.18rem;
 }
 
-.brace-symbol {
+.brace-root small {
+  margin-top: 6px;
+  color: var(--vp-c-text-2);
+}
+
+.brace-rail {
+  position: relative;
   display: grid;
   place-items: center;
-  color: rgba(37, 99, 235, 0.55);
-  font-family: Georgia, serif;
-  font-size: 12rem;
-  line-height: 1;
+}
+
+.brace-rail::before,
+.brace-rail::after,
+.brace-rail span {
+  content: '';
+  position: absolute;
+  width: 28px;
+  border-color: rgba(37, 99, 235, 0.58);
+  border-style: solid;
+}
+
+.brace-rail::before {
+  top: 9%;
+  bottom: 50%;
+  right: 4px;
+  border-width: 3px 0 0 3px;
+  border-radius: 28px 0 0 0;
+}
+
+.brace-rail::after {
+  top: 50%;
+  bottom: 9%;
+  right: 4px;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 28px;
+}
+
+.brace-rail span {
+  top: 50%;
+  right: 0;
+  border-width: 3px 0 0 0;
 }
 
 .brace-groups {
@@ -404,17 +520,25 @@ function stopDrag() {
   color: var(--vp-c-text-1);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.brace-group:hover {
+.brace-group:hover,
+.brace-group.active {
   transform: translateY(-2px);
   border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .brace-group h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 1rem;
+}
+
+.brace-group p {
+  margin: 0 0 8px;
+  color: var(--vp-c-text-2);
+  line-height: 1.6;
 }
 
 .brace-group ul {
@@ -430,6 +554,35 @@ function stopDrag() {
   border-radius: 14px;
 }
 
+@keyframes node-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+
+@keyframes center-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.10), 0 18px 38px rgba(37, 99, 235, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(37, 99, 235, 0.04), 0 20px 42px rgba(37, 99, 235, 0.26);
+  }
+}
+
 @media (max-width: 760px) {
   .knowledge-map-header {
     flex-direction: column;
@@ -442,14 +595,14 @@ function stopDrag() {
 
   .knowledge-node-canvas {
     min-width: 820px;
-    height: 520px;
+    height: 540px;
   }
 
   .brace-map {
     grid-template-columns: 1fr;
   }
 
-  .brace-symbol {
+  .brace-rail {
     display: none;
   }
 }
