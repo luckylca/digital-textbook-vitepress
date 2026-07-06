@@ -15,11 +15,26 @@ const principleSteps = [
 ]
 </script>
 
-# 5.1 异步电机概述
+<div class="chapter-hero">
+  <div class="chapter-number">5.1</div>
+  <div>
+    <div class="chapter-kicker">第五章 · 异步电机</div>
+    <h1>5.1 异步电机概述</h1>
+    <p>从结构、工作原理、同步转速与转差率、运行状态和铭牌额定值五条线索理解异步电机。</p>
+    <div class="hero-badges">
+      <span class="hero-badge">结构图例</span>
+      <span class="hero-badge">工作原理动画</span>
+      <span class="hero-badge">转差率演示</span>
+      <span class="hero-badge">即时练习</span>
+    </div>
+  </div>
+</div>
 
 <div class="placeholder-note">
 本节把异步电机的类型、结构、工作原理、转差率、运行状态和额定值串成一条学习主线：先知道它是什么，再知道它为什么会转，最后会用公式判断和计算。
 </div>
+
+<KnowledgeMap />
 
 ## 学习目标
 
