@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+  section51BraceGroups,
+  section51FlowSteps,
+  section51KnowledgeLinks,
+  section51KnowledgeNodes,
+  section51MotorParts,
+  section51PracticeQuestions,
+  section51StateRegions
+} from '../.vitepress/theme/data/section51'
+
 const typeSteps = [
   '先看相数：单相异步机、三相异步机。',
   '再看转子结构：绕线型异步机、笼型异步机。',
@@ -34,7 +44,13 @@ const principleSteps = [
 本节把异步电机的类型、结构、工作原理、转差率、运行状态和额定值串成一条学习主线：先知道它是什么，再知道它为什么会转，最后会用公式判断和计算。
 </div>
 
-<KnowledgeMap />
+<KnowledgeMap
+  title="本节知识地图"
+  subtitle="拖拽节点，先建立 5.1 的整体框架，再进入公式和运行状态。"
+  :nodes="section51KnowledgeNodes"
+  :links="section51KnowledgeLinks"
+  :brace-groups="section51BraceGroups"
+/>
 
 ## 学习目标
 
@@ -102,7 +118,7 @@ const principleSteps = [
 定子负责建立旋转磁场，转子通过感应获得电流并产生转矩，气隙是定子和转子之间进行电磁耦合的关键空间。
 </KnowledgeCard>
 
-<MotorStructureDiagram />
+<MotorStructureDiagram :parts="section51MotorParts" />
 
 ### 1. 定子
 
@@ -147,7 +163,7 @@ const principleSteps = [
 
 <StepExplain title="基本工作原理" :steps="principleSteps" />
 
-<WorkingPrincipleFlow />
+<WorkingPrincipleFlow :steps="section51FlowSteps" />
 
 <KnowledgeCard title="核心因果链" type="summary">
 定子三相电流产生气隙基波旋转磁场；旋转磁场切割转子导体，使转子产生感应电动势和感应电流；转子感应电流与旋转磁场相互作用，在转子上产生电磁转矩。
@@ -203,7 +219,7 @@ s = (n1 - n) / n1
 | 发电机状态 | n &gt; n1，s &lt; 0 | Tem 与 n 反向，为制动转矩 | 机械动能 → 电网电能 |
 | 电磁制动状态 | n &lt; 0，s &gt; 1 | Tem 与 n 反向，为制动转矩 | 机械动能 + 电网电能 → 内部损耗 |
 
-<MotorStateMap />
+<MotorStateMap :states="section51StateRegions" />
 
 <ImportantCard title="判断运行状态的最稳方法" type="info">
 不要只凭“转得快还是慢”判断。先算 s = (n1 - n) / n1，再看 s 的范围。
@@ -328,7 +344,7 @@ PN ≈ 2159 W ≈ 2.16 kW
 
 本练习区把基础概念、公式理解、运行状态判断、简单计算和易错辨析合并在一起。每题作答后会立即显示反馈，适合学完一遍后自查。
 
-<PracticePanel />
+<PracticePanel :questions="section51PracticeQuestions" />
 
 ## 本节小结
 
