@@ -3,19 +3,19 @@ import { withBase } from 'vitepress'
 
 const features = [
   { icon: '🧠', title: '知识点讲解', desc: '用卡片化结构承载概念、公式和结论。' },
-  { icon: '📝', title: '例题讲解', desc: '为典型题预留题目、思路、步骤和答案区域。' },
+  { icon: '📝', title: '例题讲解', desc: '为典型题展示题目、思路、步骤和答案。' },
   { icon: '✅', title: '即时练习', desc: '通过选择题组件提供即时反馈和解析。' },
-  { icon: '🎬', title: '交互演示', desc: '预留动画演示组件，后续绑定具体知识点。' },
-  { icon: '📌', title: '学习总结', desc: '为每节内容沉淀重点和易错提醒。' }
+  { icon: '🎬', title: '交互演示', desc: '用同步转速与转差率演示帮助理解运行状态。' },
+  { icon: '🎮', title: '闯关练习', desc: '通过判断运行状态小游戏巩固转差率应用。' }
 ]
 </script>
 
 <div class="textbook-hero">
   <h1>数字化教材样章 Demo</h1>
-  <p>这是一个使用 VitePress + Naive UI 构建的数字化教材网页原型，当前重点是先完成工程骨架、页面结构和可复用教学组件。</p>
+  <p>这是一个使用 VitePress + Naive UI 构建的数字化教材网页原型。当前样章主题为“5.1 异步电机概述”，包含知识点讲解、例题、即时练习、交互演示和闯关小游戏。</p>
   <div class="home-actions">
     <n-button type="primary" size="large" tag="a" :href="withBase('/chapter-5/section-5-1')">
-      进入 5.1 样章
+      进入 5.1 异步电机概述
     </n-button>
     <n-button size="large" tag="a" href="#功能展示">
       查看功能展示
@@ -33,14 +33,14 @@ const features = [
   </n-card>
 </div>
 
-<ImportantCard title="当前阶段说明" type="info">
-当前第一阶段仅完成工程骨架、首页、章节占位、组件骨架和部署配置。正式教材内容将在后续根据 5.1.pdf 的实际内容分批补充。
+<ImportantCard title="当前阶段说明" type="success">
+第二阶段已将 5.1 异步电机概述整理为数字化教材页面，并加入同步转速与转差率交互演示、运行状态判断小游戏和即时练习。
 </ImportantCard>
 
 ## 组件预览
 
 <KnowledgeCard title="知识点卡片示例" type="concept">
-这里展示的是组件骨架效果，不代表 5.1.pdf 的正式教材内容。
+教材页面会用卡片突出概念、公式、易错点和小结，帮助学生从普通文字阅读转向结构化学习。
 </KnowledgeCard>
 
 <AnimationDemo />
