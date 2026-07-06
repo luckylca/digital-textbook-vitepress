@@ -41,6 +41,8 @@ pnpm docs:build
 docs/.vitepress/dist
 ```
 
+VitePress 项目源码里通常不会手写 `index.html`。`index.html` 会在构建时由 VitePress 根据 Markdown 页面自动生成。
+
 ## 本地预览
 
 ```bash
@@ -72,7 +74,7 @@ Settings → Pages → Build and deployment → Source → GitHub Actions
 部署成功后，普通项目仓库的访问路径通常是：
 
 ```text
-luckylca.github.io/digital-textbook-vitepress/
+https://luckylca.github.io/digital-textbook-vitepress/
 ```
 
 ## 项目目录说明
