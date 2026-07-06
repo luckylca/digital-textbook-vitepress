@@ -1,0 +1,126 @@
+:root {
+  --dt-card-radius: 18px;
+  --dt-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --dt-border: 1px solid rgba(100, 116, 139, 0.18);
+}
+
+.VPDoc .container {
+  max-width: 1120px !important;
+}
+
+.VPDoc .content {
+  max-width: 860px !important;
+}
+
+.vp-doc h1 {
+  letter-spacing: -0.04em;
+}
+
+.vp-doc h2 {
+  margin-top: 40px;
+  border-top: none;
+}
+
+.textbook-hero {
+  padding: 44px;
+  margin: 24px 0 32px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.12));
+  border: var(--dt-border);
+  box-shadow: var(--dt-shadow);
+}
+
+.textbook-hero h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.05;
+}
+
+.textbook-hero p {
+  max-width: 720px;
+  color: var(--vp-c-text-2);
+  font-size: 1.08rem;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.feature-card,
+.teaching-card {
+  border-radius: var(--dt-card-radius);
+  border: var(--dt-border);
+  box-shadow: var(--dt-shadow);
+}
+
+.feature-card {
+  min-height: 150px;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.placeholder-note {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  color: var(--vp-c-text-2);
+}
+
+.component-space {
+  margin: 18px 0;
+}
+
+.quiz-option-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.animation-stage {
+  position: relative;
+  height: 90px;
+  margin: 18px 0;
+  border-radius: 16px;
+  background: repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.12) 12px, transparent 12px, transparent 24px);
+  overflow: hidden;
+}
+
+.animation-dot {
+  position: absolute;
+  left: 18px;
+  top: 28px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--vp-c-brand-1);
+  transition: transform 0.55s ease, opacity 0.55s ease;
+}
+
+.animation-dot.is-moved {
+  transform: translateX(220px) scale(1.15);
+  opacity: 0.78;
+}
+
+@media (max-width: 640px) {
+  .textbook-hero {
+    padding: 28px 22px;
+  }
+
+  .animation-dot.is-moved {
+    transform: translateX(150px) scale(1.12);
+  }
+}
