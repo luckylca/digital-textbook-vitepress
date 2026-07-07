@@ -8,38 +8,24 @@
   --dt-soft-green: rgba(16, 185, 129, 0.10);
 }
 
-/* KaTeX 公式渲染修复：防止 VitePress 或自定义教材样式破坏上下标、分式和根号布局。 */
-.vp-doc .katex,
-.vp-doc .katex * {
-  line-height: normal;
-  text-indent: 0;
-  letter-spacing: normal;
-}
-
-.vp-doc .katex {
-  font-size: 1.06em;
-  white-space: nowrap;
-}
-
+/* KaTeX 外层展示样式：只修饰公式块容器，不覆盖 KaTeX 内部结构。 */
 .vp-doc .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.75rem 0.9rem;
+  padding: 0.75rem 0.8rem;
   margin: 1rem 0;
+  text-align: center;
+  background: rgba(248, 250, 252, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 14px;
-  background: rgba(248, 250, 252, 0.8);
-  text-align: center;
 }
 
 .vp-doc .katex-display > .katex {
-  display: inline-block;
   max-width: 100%;
 }
 
-.vp-doc p .katex,
-.example-block .katex {
-  vertical-align: baseline;
+.vp-doc .katex {
+  font-size: 1.04em;
 }
 
 .VPDoc .container {
@@ -277,7 +263,7 @@
 @media (max-width: 768px) {
   .vp-doc .katex-display {
     font-size: 0.92em;
-    padding: 0.6rem 0.4rem;
+    padding: 0.6rem 0.5rem;
   }
 }
 
