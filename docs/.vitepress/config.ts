@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import katex from 'markdown-it-katex'
+import { katex } from '@mdit/plugin-katex'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -17,13 +17,20 @@ export default defineConfig({
     logo: '📘',
     nav: [
       { text: '首页', link: '/' },
-      { text: '5.1 异步电机概述', link: '/chapter-5/section-5-1' }
+      { text: '5.1 异步电机概述', link: '/chapter-5/section-5-1' },
+      { text: '公式测试', link: '/debug/formula' }
     ],
     sidebar: [
       {
         text: '第五章 异步电机',
         items: [
           { text: '5.1 异步电机概述', link: '/chapter-5/section-5-1' }
+        ]
+      },
+      {
+        text: '调试页面',
+        items: [
+          { text: '公式渲染测试', link: '/debug/formula' }
         ]
       }
     ],
