@@ -211,5 +211,37 @@ onBeforeUnmount(() => {
 .is-generator .state-pill { color: #2563eb; }
 .is-brake .state-pill { color: #dc2626; }
 .slip-demo__metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 760px) { .slip-demo__layout, .slip-demo__metrics { grid-template-columns: 1fr; } .control-row { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .slip-demo__layout,
+  .slip-demo__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .example-buttons :deep(.n-button) {
+    flex: 1 1 46%;
+  }
+
+  .control-row {
+    grid-template-columns: 1fr;
+  }
+
+  .meter-card__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .motor-visual {
+    min-height: 260px;
+  }
+
+  .motor-visual svg {
+    height: 260px;
+  }
+
+  .state-pill {
+    right: 10px;
+    top: 10px;
+    font-size: 0.86rem;
+  }
+}
 </style>
