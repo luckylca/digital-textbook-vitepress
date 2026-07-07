@@ -40,7 +40,7 @@ const principleSteps = [
   </div>
 </div>
 
-<div class="placeholder-note">
+<div class="section-lead-note">
 本节把异步电机的类型、结构、工作原理、转差率、运行状态和额定值串成一条学习主线：先知道它是什么，再知道它为什么会转，最后会用公式判断和计算。
 </div>
 
