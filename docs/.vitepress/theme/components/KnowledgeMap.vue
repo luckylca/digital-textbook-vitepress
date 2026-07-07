@@ -19,19 +19,20 @@ const props = withDefaults(defineProps<{
   defaultMode?: KnowledgeMapMode
 }>(), {
   title: '本节知识地图',
-  subtitle: '拖拽节点，先建立整体框架，再进入公式和运行状态。',
-  defaultMode: 'node'
+  subtitle: '拖拽节点，先建立整体框架，再进入公式和运行状态。'
 })
 
 const width = 980
 const height = 600
-const mapMode = ref<KnowledgeMapMode>(props.defaultMode)
+const mapMode = ref<KnowledgeMapMode>(props.defaultMode ?? 'node')
 const selectedId = ref('center')
 const hoveredId = ref<string | null>(null)
 const draggingId = ref<string | null>(null)
 const dragOffset = ref({ x: 0, y: 0 })
 const frameId = ref<number | null>(null)
 const mounted = ref(false)
+const isMobile = ref(false)
+const modeTouched = ref(false)
 
 const resolvedNodes = computed(() => props.nodes?.length ? props.nodes : section51KnowledgeNodes)
 const resolvedLinks = computed(() => props.links?.length ? props.links : section51KnowledgeLinks)
@@ -52,6 +53,19 @@ watch(mapMode, (mode) => {
 
 function cloneNodes(source: KnowledgeNode[]): SimNode[] {
   return source.map((node) => ({ ...node, vx: 0, vy: 0, targetX: node.x, targetY: node.y }))
+}
+
+function updateIsMobile() {
+  if (typeof window === 'undefined') return
+  isMobile.value = window.innerWidth <= 768
+  if (!props.defaultMode && !modeTouched.value) {
+    mapMode.value = isMobile.value ? 'brace' : 'node'
+  }
+}
+
+function setMode(mode: KnowledgeMapMode) {
+  modeTouched.value = true
+  mapMode.value = mode
 }
 
 function getNode(id: string) {
@@ -121,12 +135,14 @@ function targetLayout() {
 }
 
 function resetLayout() {
+  if (mapMode.value !== 'node') return
   stopPhysics()
   nodes.value = cloneNodes(resolvedNodes.value)
   selectedId.value = nodes.value[0]?.id || 'center'
 }
 
 function autoArrange() {
+  if (mapMode.value !== 'node') return
   const targets = targetLayout()
   nodes.value.forEach((node) => {
     const target = targets[node.id]
@@ -315,12 +331,17 @@ function stopPhysics() {
 
 onMounted(() => {
   mounted.value = true
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
   startPhysics(true)
 })
 
 onBeforeUnmount(() => {
   mounted.value = false
   stopPhysics()
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', updateIsMobile)
+  }
 })
 </script>
 
@@ -334,11 +355,13 @@ onBeforeUnmount(() => {
       </div>
       <div class="map-actions">
         <n-button-group>
-          <n-button :type="mapMode === 'node' ? 'primary' : 'default'" @click="mapMode = 'node'">节点图</n-button>
-          <n-button :type="mapMode === 'brace' ? 'primary' : 'default'" @click="mapMode = 'brace'">大括号图</n-button>
+          <n-button :type="mapMode === 'node' ? 'primary' : 'default'" @click="setMode('node')">节点图</n-button>
+          <n-button :type="mapMode === 'brace' ? 'primary' : 'default'" @click="setMode('brace')">大括号图</n-button>
         </n-button-group>
-        <n-button secondary @click="autoArrange">自动整理</n-button>
-        <n-button secondary @click="resetLayout">重置布局</n-button>
+        <template v-if="mapMode === 'node'">
+          <n-button secondary @click="autoArrange">自动整理</n-button>
+          <n-button secondary @click="resetLayout">重置布局</n-button>
+        </template>
       </div>
     </div>
 
@@ -401,7 +424,7 @@ onBeforeUnmount(() => {
 .map-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .map-fade-enter-active, .map-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .map-fade-enter-from, .map-fade-leave-to { opacity: 0; transform: translateY(8px); }
-.knowledge-node-wrap { overflow: hidden; padding-bottom: 8px; }
+.knowledge-node-wrap { overflow-x: auto; overflow-y: hidden; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
 .knowledge-node-canvas { position: relative; min-width: 980px; height: 600px; border-radius: 26px; border: 1px solid rgba(148, 163, 184, 0.28); background: radial-gradient(circle at 50% 38%, rgba(59, 130, 246, 0.15), transparent 28%), radial-gradient(circle at 20% 18%, rgba(16, 185, 129, 0.12), transparent 20%), linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(16, 185, 129, 0.08)); touch-action: none; overflow: hidden; }
 .knowledge-node-canvas::after { content: ''; position: absolute; inset: 18px; border-radius: 22px; border: 1px dashed rgba(37, 99, 235, 0.12); pointer-events: none; }
 .knowledge-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -432,5 +455,23 @@ onBeforeUnmount(() => {
 .knowledge-map-info { margin-top: 16px; border-radius: 14px; }
 @keyframes node-pop { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes center-pulse { 0%, 100% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.10), 0 18px 38px rgba(37, 99, 235, 0.22); } 50% { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0.04), 0 20px 42px rgba(37, 99, 235, 0.26); } }
-@media (max-width: 768px) { .knowledge-map-card { display: none; } }
+@media (max-width: 768px) {
+  .knowledge-map-card { margin: 18px 0 28px; }
+  .knowledge-map-header { flex-direction: column; gap: 12px; }
+  .knowledge-map-header h2 { font-size: 1.24rem; }
+  .knowledge-map-header p { font-size: 0.94rem; }
+  .map-actions { width: 100%; justify-content: flex-start; }
+  .map-actions :deep(.n-button-group) { flex-wrap: wrap; }
+  .knowledge-node-wrap { margin: 0 -4px; overflow-x: auto; }
+  .knowledge-node-canvas { min-width: 820px; height: 520px; border-radius: 20px; }
+  .brace-map { grid-template-columns: 1fr; gap: 12px; padding: 14px; border-radius: 20px; }
+  .brace-root { padding: 16px; border-radius: 18px; place-content: start; text-align: left; }
+  .brace-root strong { font-size: 1.05rem; }
+  .brace-rail { display: none; }
+  .brace-groups { gap: 10px; }
+  .brace-group { padding: 13px 14px; border-radius: 15px; }
+  .brace-group h3 { font-size: 0.96rem; }
+  .brace-group p,
+  .brace-group ul { font-size: 0.9rem; }
+}
 </style>
