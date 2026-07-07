@@ -28,14 +28,12 @@ defineProps<{
   line-height: 1.8;
 }
 
-.example-block__content :deep(.katex),
-.example-block__content :deep(.katex *) {
-  line-height: normal;
-  letter-spacing: normal;
-  text-indent: 0;
+.example-block__content > :deep(p) {
+  margin: 0.7rem 0;
 }
 
-.example-block__content :deep(.katex-display) {
-  line-height: normal;
+.example-block__content > :deep(ul),
+.example-block__content > :deep(ol) {
+  margin: 0.7rem 0;
 }
 </style>
