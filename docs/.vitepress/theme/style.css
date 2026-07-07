@@ -1,9 +1,45 @@
+@import "katex/dist/katex.min.css";
+
 :root {
   --dt-card-radius: 18px;
   --dt-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
   --dt-border: 1px solid rgba(100, 116, 139, 0.18);
   --dt-soft-blue: rgba(37, 99, 235, 0.10);
   --dt-soft-green: rgba(16, 185, 129, 0.10);
+}
+
+/* KaTeX 公式渲染修复：防止 VitePress 或自定义教材样式破坏上下标、分式和根号布局。 */
+.vp-doc .katex,
+.vp-doc .katex * {
+  line-height: normal;
+  text-indent: 0;
+  letter-spacing: normal;
+}
+
+.vp-doc .katex {
+  font-size: 1.06em;
+  white-space: nowrap;
+}
+
+.vp-doc .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75rem 0.9rem;
+  margin: 1rem 0;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.8);
+  text-align: center;
+}
+
+.vp-doc .katex-display > .katex {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.vp-doc p .katex,
+.example-block .katex {
+  vertical-align: baseline;
 }
 
 .VPDoc .container {
@@ -236,6 +272,13 @@
 .animation-dot.is-moved {
   transform: translateX(220px) scale(1.15);
   opacity: 0.78;
+}
+
+@media (max-width: 768px) {
+  .vp-doc .katex-display {
+    font-size: 0.92em;
+    padding: 0.6rem 0.4rem;
+  }
 }
 
 @media (max-width: 700px) {
